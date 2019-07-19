@@ -9,7 +9,7 @@
             window.$$ = new xiaoc();
 
             window.appConfig = {
-                api_domain: "http://47.91.153.112",
+                api_domain: "http://116.62.199.125",
                 ips_list: ["11.46.5.179", "12.47.6.162","13.48.7.123"],
                 version: "1.0.0"
             };
@@ -20,6 +20,12 @@
 
                 //状态栏
                 $$.bridge.callHandler("native_handle","black");
+
+
+                //处理角标,与原生交互
+                try {
+                    $$.bridge.callHandler('native_handle', "SetApplicationIconBadgeNumber:0");
+                } catch (err) {}
 
                 //默认api地址设置
                 try {
