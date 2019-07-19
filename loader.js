@@ -112,13 +112,6 @@
                     $$.bridge.callHandler('native_handle','check_version');
                 },3000);
             });
-
-            //pc上调试
-            if(!$$.bridge) {
-                window.key = "79bde310f0e8472e8de333b225feee45";
-                window.secret = "922b5b8f23e846cdb1e7a87ea33b6208";
-                event(true);
-            }
         }
     );
 
