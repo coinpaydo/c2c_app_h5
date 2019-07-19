@@ -21,12 +21,42 @@
                 //状态栏
                 $$.bridge.callHandler("native_handle","black");
 
-                init(function(result){
-                    event(result);
-                });
+                //默认api地址设置
+                try {
+                    $$.bridge.callHandler('native_handle','localStorage_get_apiDomain',function(result){
+                        if(result["err"] == 0 && result["code"] == 1 && result["msg"]){
+                            window.appConfig["api_domain"] = decodeURIComponent(result["msg"]);
+                        }else{
+                            $$.bridge.callHandler('native_handle','localStorage_set_apiDomain:'+encodeURIComponent(window.appConfig["api_domain"]),function(){
+                                //ip地址库设置
+                                var ips = window.appConfig["ips_list"];
+                                $$.bridge.callHandler('native_handle','localStorage_set_ips:'+ips.join(","),function(){});
+                            });
+                        }
+                    });
+                }catch (err){}
+
+                //版本号设置
+                try {
+                    $$.bridge.callHandler('native_handle', "localStorage_set_appVersion:"+window.appConfig["version"]);
+
+                    setTimeout(function(){
+                        //自动升级
+                        $$.bridge.callHandler('native_handle','check_version');
+                    },3000);
+
+                } catch (err) {}
+
+                //开始
+                try {
+                    init(function(result){
+                        event(result);
+                    });
+                } catch (err) {}
 
                 //获取扫描结果
-                $$.bridge.registerHandler('call_back_js_scan',function(data,responseCallback){
+                try {
+                    $$.bridge.registerHandler('call_back_js_scan',function(data,responseCallback){
 
                     loading("off");
 
@@ -66,6 +96,7 @@
                         $$.bridge.callHandler("native_handle","black");
                     },500);
                 });
+                } catch (err) {}
 
                 change_ui();
 
@@ -106,11 +137,6 @@
                             break;
                     }
                 });
-
-                setTimeout(function(){
-                    //自动升级
-                    $$.bridge.callHandler('native_handle','check_version');
-                },3000);
             });
         }
     );
