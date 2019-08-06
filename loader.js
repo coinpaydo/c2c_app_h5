@@ -9,7 +9,7 @@
             window.$$ = new xiaoc();
 
             window.appConfig = {
-                api_domain: "http://116.62.199.125",
+                api_domain: "http://47.91.153.112",
                 ips_list: ["11.46.5.179", "12.47.6.162","13.48.7.123"],
                 version: "1.0.0"
             };
@@ -144,6 +144,13 @@
                     }
                 });
             });
+
+            //pc上调试
+            if(!$$.bridge) {
+                window.key = "79bde310f0e8472e8de333b225feee45";
+                window.secret = "922b5b8f23e846cdb1e7a87ea33b6208";
+                event(true);
+            }
         }
     );
 
@@ -633,7 +640,7 @@
     function order_check(state,n){
         var timer = new Date().getTime();
         var orderShow = $$.obj("#orderShow");
-        var showList = orderShow.getElementsByClassName("show-list");
+        //var showList = orderShow.getElementsByClassName("show-list");
         loading();
         //if(showList[n]) showList[n].innerHTML = '';
         $$.ajax({
