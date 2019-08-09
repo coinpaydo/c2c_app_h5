@@ -261,6 +261,7 @@ footer ol li.active .icon-text-2{ color: #10c17d; display: block;}
 .order-pay .qrcode>em:nth-of-type(1){ font-size: 0;}
 .order-pay .save-qr-code{ font-size: 28px; color: #297ce0; display: block; padding: 0 10px;}
 .order-pay .qrcode .save-qr-code:after{ display: none;}
+.order-pay .save-qr-code.touch-event-active{text-decoration: underline;}
 .order-pay .qrcode>em:nth-of-type(1)>img{
     width: 100px;
     vertical-align: bottom;
@@ -490,4 +491,9 @@ footer ol li.active .icon-text-2{ color: #10c17d; display: block;}
 .tel.btn.disabled{
     color: #ccc!important;
     border-color: #ccc!important;
+}
+.right .btn.disabled{
+    color: #ccc!important;
+    background: none!important;
+    border:2px solid #ccc!important;
 }

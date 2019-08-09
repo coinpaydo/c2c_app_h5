@@ -322,7 +322,8 @@
                         "5":"close"//已关闭
                     };
                     var source_data = {
-                        "support" : "UBi.Bi"
+                        "support" : "Exnet.io交易平台",
+                        "huiyoubao.tld" : "ODIN浏览器生态链"
                     };
                     var data_code = get_the.parentNode.getAttribute("data-code");
                     data_code = decodeURIComponent(data_code);
@@ -422,7 +423,7 @@
                     //confirm(data_code2);
                     data_code2 = JSON.parse(data_code2);
                     var orderID = data_code2["orderNum"];
-                    var createTime = new Date().getTime();
+                    var createTime = parseInt(data_code2["createTime"]);//new Date().getTime();
                     var paymentID = data_code2["opmId"];
 
                     confirm("此操作不可逆，确定？",{
@@ -467,9 +468,17 @@
                 }
             }catch (err){alert(err)}
 
+            try{
+                //保存图片到相册
+                if(get_the.className && get_the.className.indexOf("save-qr-code")>=0){
+                    if(!get_the.getAttribute("data-code")) return alert("图片地址为空");
+                    pic_download(get_the.getAttribute("data-code"));
+                }
+            }catch (err){alert(err)}
+
             try {
                 //有新的订单，点击刷新
-                if(get_the.innerText && get_the.innerText=="有新的订单，点击刷新") {
+                if(get_the.innerText && get_the.innerText=="有新的订单，点击查看") {
                     $$.obj("#menu").getElementsByTagName("li")[0].onclick();
                     setTimeout(function(){
                         get_the.style.display = "none";
@@ -710,7 +719,8 @@
                     "5":"订单已被关闭"//已关闭
                 };
                 var source_data = {
-                    "support" : "UBi.Bi"
+                    "support" : "Exnet.io交易平台用户",
+                    "huiyoubao.tld" : "ODIN浏览器生态链用户"
                 };
                 var ulObj = showList[n].getElementsByTagName("ul");
 
@@ -795,7 +805,7 @@
                                         pay_html = '<p class="order-pay">' +
                                             '<span class="qrcode">' +
                                             '<em><img src="https://api.coinpay.do/' + accountInfo["img"] + '"></em>' +
-                                            '<em class="save-qr-code">保存图片到相册</em>' +
+                                            '<em class="save-qr-code touch-event"  data-code="https://api.coinpay.do/' + accountInfo["img"] + '">保存图片到相册</em>' +
                                             '</span>' +
                                             '<span>' +
                                             '<em>收款方</em>' +
@@ -822,7 +832,7 @@
                                 '<span class="user-info">' +
                                 '<em class="user-photo">'+simpleUserName+'</em>' +
                                 '<em class="user-nick-name">' + [_data[i]["buyerNickName"]=="support"?username:_data[i]["buyerNickName"]] + '</em>' +
-                                '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do"]+'</em>' +
+                                '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do用户"]+'</em>' +
                                 '</span>' +
                                 '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) + '</span>' +
                                 '</p>' +
@@ -846,7 +856,7 @@
                                 '<a href="'+[tel?"tel:"+tel:"javascript:;"]+'" class="tel btn touch-event '+[tel?"":"disabled"]+'">'+[tel?"电话催促":"未留电话"]+'</a>' +
                                 '</span>' +
                                 '<span class="right">' +
-                                '<a href="javascript:;" class="btn touch-event">' + [_data[i]["transactionType"] == "0" ? "我已付款" : "立即放币"] + '</a>' +
+                                '<a href="javascript:;" class="btn touch-event'+[[_data[i]["transactionType"]=="1"?[_data[i]["tradingState"]=="2"?"":" disabled"]:[""]]]+'">' + [_data[i]["transactionType"] == "0" ? "我已付款" : "立即放币"] + '</a>' +
                                 '</span>' +
                                 '</p>';
 
@@ -910,8 +920,9 @@
                     if(hours>0) temp_timer += hours + "小时";
                     if(minutes>0) temp_timer += minutes + "分";
                     if(second>0) temp_timer += second + "秒";
-                    confirm("订单("+orderID+")放币成功!</br>本订单耗时 "+ temp_timer,function(){
-                        $$.obj("#orderIng").onclick();
+                    confirm("订单("+orderID+")放币成功!</br>本订单耗时 "+ temp_timer,null,function(){
+                        //$$.obj(".icon-order")[0].parentNode.onclick();
+                        document.location.reload();
                     });
                 }else if(result["err"] == "1") {
                     //失败
@@ -1239,6 +1250,15 @@
         } catch (err) {}
     }
 
+    function pic_download(url){
+        //与原生交互
+        try {
+            $$.bridge.callHandler('native_handle', "save_img_url_"+url,function(data){
+                alert("已经保存到系统相册");
+            });
+        } catch (err) {}
+    }
+
     //定时任务
     function autoTimeRun(){
 
@@ -1333,7 +1353,8 @@
                             "5":"订单已被关闭"//已关闭
                         };
                         var source_data = {
-                            "support":"UBi.Bi"
+                            "support" : "Exnet.io交易平台用户",
+                            "huiyoubao.tld" : "ODIN浏览器生态链用户"
                         };
                         $$.order_by(_data, "createTime", true);
                         for (var i = 0; i < len; i++) {
@@ -1381,7 +1402,7 @@
                                         pay_html = '<p class="order-pay">' +
                                             '<span class="qrcode">' +
                                             '<em><img src="https://api.coinpay.do/' + accountInfo["img"] + '"></em>' +
-                                            '<em class="save-qr-code">保存图片到相册</em>' +
+                                            '<em class="save-qr-code touch-event" data-code="https://api.coinpay.do/' + accountInfo["img"] + '">保存图片到相册</em>' +
                                             '</span>' +
                                             '<span>' +
                                             '<em>收款方</em>' +
@@ -1408,7 +1429,7 @@
                                 '<span class="user-info">' +
                                 '<em class="user-photo">'+simpleUserName+'</em>' +
                                 '<em class="user-nick-name">' + [_data[i]["buyerNickName"]=="support"?username:_data[i]["buyerNickName"]] + '</em>' +
-                                '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do"]+'</em>' +
+                                '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do用户"]+'</em>' +
                                 '</span>' +
                                 '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) + '</span>' +
                                 '</p>' +
@@ -1432,7 +1453,7 @@
                                 '<a href="'+[tel?"tel:"+tel:"javascript:;"]+'" class="tel btn touch-event '+[tel?"":"disabled"]+'">'+[tel?"电话催促":"未留电话"]+'</a>' +
                                 '</span>' +
                                 '<span class="right">' +
-                                '<a href="javascript:;" class="btn touch-event">' + [_data[i]["transactionType"] == "0" ? "我已付款" : "立即放币"] + '</a>' +
+                                '<a href="javascript:;" class="btn touch-event'+[[_data[i]["transactionType"]=="1"?[_data[i]["tradingState"]=="2"?"":" disabled"]:[""]]]+'">' + [_data[i]["transactionType"] == "0" ? "我已付款" : "立即放币"] + '</a>' +
                                 '</span>' +
                                 '</p>';
 
