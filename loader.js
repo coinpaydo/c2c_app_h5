@@ -260,6 +260,42 @@
     }
 
     function event(isLogin){
+
+        //初始化数据
+        try {
+            var boxOutSelect = $$.obj("#boxOutSelect");
+            var walletAllList = $$.obj("#walletAllList");
+            loading();
+            $$.ajax({
+                url : "https://api.coinpay.do/pizza/gw/index/create",
+                type : "GET",
+                success : function(data){
+                    data = JSON.parse(data);
+                    if(data["err"] == "0"){
+                        //币种列表
+                        var li = '';
+                        var coin_data = data["data"]["moneyType"];
+                        for(var i=0;i<coin_data.length;i++){
+                            var the = coin_data[i];
+                            if(the["type"] == "0" && the["state"] == "1")
+                                li += '<li data-code="coinList" class="touch-event">'+the["currencyCode"]+'</li>';
+                        }
+                        walletAllList.innerHTML = li+'<li class="touch-event">取消</li>';
+                    }
+                    if(data["err"] == "1"){
+                        //失败
+                        confirm("订单查询失败(原因："+data["msg"]+")");
+                    }
+
+                    loading("off");
+                },
+                fail : function(){
+                    loading("off");
+                    confirm("网络超时，初始化查询失败");
+                }
+            });
+        }catch (err){}
+
         //扫一扫
         $$.obj("#scan").onclick = function(){
             //扫一扫,与原生交互
@@ -485,6 +521,23 @@
                     },200);
                 }
             }catch (err){alert(err)}
+
+            try {
+                //取消
+                if(get_the.innerText && get_the.innerText=="取消") {
+                    $$.removeClass($$.obj("#boxOutSelect"),"show");
+                }
+            }catch (err){alert(err)}
+
+            try {
+                //点击列表切换币种
+                if(get_the.getAttribute("data-code") && get_the.getAttribute("data-code")=="coinList") {
+                    var code = get_the.innerText;
+                    localStorage.setItem("current_coin_type",code.toLocaleUpperCase());
+                    $$.removeClass($$.obj("#boxOutSelect"),"show");
+                    my_wallet();
+                }
+            }catch (err){alert(err)}
         };
 
         var pageDetail = $$.obj("#pageDetail");
@@ -530,6 +583,18 @@
         orderID.onclick = function(){
             copy(this.getAttribute("data-order-id"));
         };
+
+        //切换币种
+        var walletTab = $$.obj("#walletTab");
+        if(walletTab) walletTab.onclick = function(){
+            var boxOutSelect = $$.obj("#boxOutSelect");
+            if(!boxOutSelect.className) return;
+            if(boxOutSelect.className.indexOf(" show")<0){
+                $$.addClass(boxOutSelect,"show");
+            }else {
+                $$.removeClass(boxOutSelect,"show");
+            }
+        }
 
         //底部菜单
         for(var i=0;i<menu_li.length;i++){
@@ -744,10 +809,14 @@
                         }
                     }catch (err){}
                 }else{
-                    if(showNoData[0]) $$.removeClass(showNoData[0],"tab-active");
                     try {
-                        console.log(showList[n]);
+                        if(showNoData[0]){
+                            $$.removeClass(showNoData[0],"tab-active");
+                            showNoData[0].getElementsByClassName("no-data-text")[0].innerHTML = '';
+                        }
+                    }catch (err){}
 
+                    try {
                         //console.log("排序前：");
                         //for(var n=0;n<_data.length;n++){
                         //    console.log($$.format_time(_data[n]["createTime"]));
@@ -1100,110 +1169,161 @@
     }
 
     function my_wallet(){
+        var code = localStorage.getItem("current_coin_type");
+        if(!code) code = "USDT";
         var timer = new Date().getTime();
         var get_token = HMAC_SHA256_MAC(window.secret,"key="+window.key);
         loading();
+
+        var boxOutSelect = $$.obj("#boxOutSelect");
+        var walletAllList = $$.obj("#walletAllList");
         $$.ajax({
-            url : "https://api.coinpay.do/pizza/api/wallets/viewUserWallets",
-            type : "POST",
-            data : {
-                key:window.key,
-                content:get_token,
-                timestamp:timer
-            },
+            url : "https://api.coinpay.do/pizza/gw/coinMarketList/getCoinMarketList?convert=CNY&limit=",
+            type : "GET",
             success : function(data){
-                //confirm(data);
-                //loading("off");
                 data = JSON.parse(data);
                 if(data["err"] == "0"){
+                    var list_data = data["data"]["list"];
+                    window.cny_list = {};
+                    for(var i=0;i<list_data.length;i++){
+                        var the = list_data[i];
+                        window.cny_list[the["symbol"]] = parseFloat(the["price"]);
+                    }
+                    console.log(window.cny_list);
 
-                    var new_data = data["data"];
-
-                    //查询USDT充值地址
-                    var get_token = HMAC_SHA256_MAC(window.secret,"currencyCode=USDT&key="+window.key);
                     $$.ajax({
-                        url : "https://api.coinpay.do/pizza/api/wallets/getAddress",
+                        url : "https://api.coinpay.do/pizza/api/wallets/viewUserWallets",
                         type : "POST",
                         data : {
                             key:window.key,
                             content:get_token,
-                            currencyCode:"USDT"
+                            timestamp:timer
                         },
-                        success : function(result){
-                            //confirm(result);
-                            loading("off");
-                            result = JSON.parse(result);
-                            if(result["err"] == "0"){
-                                new_data["address"] = result["data"]["wasAddress"];
-                                console.log(new_data);
-                            }
-                            if(result["err"] == "1"){
-                                //失败
-                                confirm("查询充值地址失败(原因："+result["msg"]+")");
-                            }
+                        success : function(data){
+                            //confirm(data);
+                            //loading("off");
+                            data = JSON.parse(data);
+                            if(data["err"] == "0"){
 
-                            my_wallet_handle(new_data);
+                                var new_data = data["data"];
+
+                                //查询code充值地址
+                                var get_token = HMAC_SHA256_MAC(window.secret,"currencyCode="+code+"&key="+window.key);
+                                if(code!=="CNHT") {
+                                    $$.ajax({
+                                        url: "https://api.coinpay.do/pizza/api/wallets/getAddress",
+                                        type: "POST",
+                                        data: {
+                                            key: window.key,
+                                            content: get_token,
+                                            currencyCode: code
+                                        },
+                                        success: function (result) {
+                                            //confirm(result);
+                                            loading("off");
+                                            result = JSON.parse(result);
+                                            if (result["err"] == "0") {
+                                                new_data["address"] = result["data"]["wasAddress"];
+                                                console.log(new_data);
+                                            }
+                                            if (result["err"] == "1") {
+                                                //失败
+                                                confirm("查询充值地址失败(原因：" + result["msg"] + ")");
+                                            }
+
+                                            my_wallet_handle(code, new_data);
+                                        },
+                                        fail: function () {
+                                            loading("off");
+                                            confirm("读取钱包地址失败(可能的原因：网络超时)");
+
+                                            my_wallet_handle(code, new_data);
+                                        }
+                                    });
+                                }else{
+                                    my_wallet_handle(code,new_data);
+                                }
+
+                            }else {
+                                if (data["err"] == "1") {
+                                    //失败
+                                    confirm("读取钱包充值地址失败(原因：" + data["msg"] + ")");
+                                }
+                                loading("off");
+                            }
                         },
                         fail : function(){
                             loading("off");
-                            confirm("读取钱包地址失败(可能的原因：网络超时)");
-
-                            my_wallet_handle(new_data);
+                            confirm("读取资产数据失败(可能的原因：网络超时)");
                         }
                     });
-
-                }else {
-                    if (data["err"] == "1") {
-                        //失败
-                        confirm("读取钱包充值地址失败(原因：" + data["msg"] + ")");
-                    }
-                    loading("off");
                 }
+                if(data["err"] == "1"){
+                    //失败
+                    confirm("初始化查询失败(原因："+data["msg"]+")");
+                }
+                loading("off");
             },
             fail : function(){
                 loading("off");
-                confirm("读取资产数据失败(可能的原因：网络超时)");
+                confirm("网络超时，初始化查询失败");
             }
         });
     }
 
-    function my_wallet_handle(result){
+    function my_wallet_handle(code,result){
 
         var data = result["list"];
         var address = result["address"];
 
         for(var i=0;i<data.length;i++){
 
-            if(data[i]["currencyCode"].toUpperCase() == "USDT"){
+            if(data[i]["currencyCode"].toUpperCase() == code.toUpperCase()){
 
                 var wallet001 = $$.obj("#wallet001");
                 var wallet002 = $$.obj("#wallet002");
                 var wallet003 = $$.obj("#wallet003");
+                var wallet005 = $$.obj("#wallet005");
                 var copyBtn1 =  $$.obj("#copyBtn1");
+                var walletTitle =  $$.obj("#walletTitle");
                 var copyBtn2 =  $$.obj("#copyBtn2");
                 var copyShow1 =  $$.obj("#copyShow1");
+                var rate = window.cny_list[code]?window.cny_list[code]:1;
 
-                wallet001.innerHTML = '<span>'+data[i]["totalMoney"]+'</span> <span>USDT</span>';
-                wallet002.innerHTML = '<span>约</span> <span>'+parseFloat(data[i]["totalMoney"])*parseFloat("6.8")+'</span> <span>CNY</span>';
-                wallet003.innerHTML = 'USDT';
+                wallet001.innerHTML = '<span>'+parseFloat(data[i]["totalMoney"]).toFixed(2)+'</span> <span>'+code+'</span>';
+                wallet002.innerHTML = '<span>估值</span> <span>'+(parseFloat(data[i]["totalMoney"])*parseFloat(rate)).toFixed(2)+'</span> <span>元</span>';
+                wallet005.innerHTML = '<span>&nbsp;下单冻结</span> <span>'+((parseFloat(data[i]["totalMoney"])-parseFloat(data[i]["availableBalance"]))*parseFloat(rate)).toFixed(2)+'</span> <span>元&nbsp;</span>';
+                wallet003.innerHTML = code;
+                walletTitle.innerHTML = code+'钱包';
 
-                //获取二维码,与原生交互
-                try {
-                    $$.bridge.callHandler('native_handle', "get_qr_code_base64_13QRvNgCXAVFyPkn5smt5ohLkbTQ6QeDLL",function(result){
-                        //console.log("二维码图片Base64编码="+result["msg"]);
-                        var wallet004 = $$.obj("#wallet004");
-                        wallet004.innerHTML = '<img src="'+result["msg"]+'">';
-                    });
-                } catch (err) {}
+                if(!address){
+                    var wallet004 = $$.obj("#wallet004");
+                    wallet004.innerHTML = '<img src="https://imgs.exnet.io/exnetImgs/pub/wechat_kefu.png">';
+                    copyBtn1.innerHTML = '客服微信二维码（点击保存到相册）';
+                    copyShow1.innerHTML = code+'不支持充币，请联系客服人员';
+                    copyBtn2.innerHTML = '';
+                    copyBtn1.setAttribute("data-address","https://u.wechat.com/MMB4RLM1c5jKOzUY2HeOgjo");
+                }else {
+                    //获取二维码,与原生交互
+                    try {
+                        $$.bridge.callHandler('native_handle', "get_qr_code_base64_" + address, function (result) {
+                            //console.log("二维码图片Base64编码="+result["msg"]);
+                            var wallet004 = $$.obj("#wallet004");
+                            wallet004.innerHTML = '<img src="' + result["msg"] + '">';
+                        });
+                        copyBtn1.innerHTML = '保存二维码到相册';
+                        copyBtn2.innerHTML = '复制充值地址';
+                        //充值地址
+                        copyBtn1.setAttribute("data-address",address);
+                        copyShow1.innerHTML = address;
+                        copyBtn2.setAttribute('data-address',address);
+                    } catch (err) {
+                    }
+                }
 
                 break;
             }
         }
-
-        //充值地址
-        copyBtn1.setAttribute("data-address",address);
-        copyShow1.innerHTML = address;
-        copyBtn2.setAttribute('data-address',address);
     }
 
     //上\下架广告
@@ -1420,6 +1540,7 @@
                                         break;
                                 }
                             }catch (err){
+                                console.log(err);
                                 pay_html = '';
                             }
 

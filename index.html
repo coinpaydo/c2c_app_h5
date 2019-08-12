@@ -60,7 +60,8 @@
     <!--钱包-->
     <div class="ban">
         <header>
-            <span class="title">钱包</span>
+            <span class="title" id="walletTitle">loading</span>
+            <span class="right" id="walletTab">切换币种</span>
         </header>
         <div class="show">
             <div class="money-banner">
@@ -70,9 +71,14 @@
                     <span>USDT</span>
                 </div>
                 <div class="money-cny" id="wallet002">
-                    <span>约</span>
+                    <span>估值</span>
                     <span>0.00</span>
-                    <span>CNY</span>
+                    <span>元</span>
+                </div>
+                <div class="money-cny del-cny" id="wallet005">
+                    <span>&nbsp;下单冻结</span>
+                    <span>0.00</span>
+                    <span>元&nbsp;</span>
                 </div>
             </div>
             <div class="money-usdt">
@@ -92,6 +98,9 @@
                     <span class="money-btn touch-event" data-address="" id="copyBtn2">复制充值地址</span>
                 </div>
             </div>
+        </div>
+        <div class="box-out" id="boxOutSelect">
+            <ul class="box-out-ul" id="walletAllList"></ul>
         </div>
     </div>
 </div>

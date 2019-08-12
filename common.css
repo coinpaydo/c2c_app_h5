@@ -42,6 +42,18 @@ header .title{
     text-align: center;
     line-height: 98px;
 }
+header .right{
+    font-size: 32px;
+    font-weight: 500;
+    position: absolute;
+    right: 20px;
+    left:auto;
+    bottom: 0;
+    line-height: 98px;
+    width: auto!important;
+    text-align: center;
+    display: block;
+}
 header .tab{ display: inline-block; width: 302px; position: absolute; left: 50%; bottom: 17px; margin-left: -151px; font-size: 0; border: 1px solid #297ce0;}
 header .tab>li{ display: inline-block; line-height: 54px; color: #297ce0; height: 54px; text-align: center; width: 50%; font-size: 28px;}
 header .tab>li.tab-active{ background: #297ce0; color: #fff;}
@@ -285,6 +297,7 @@ footer ol li.active .icon-text-2{ color: #10c17d; display: block;}
 .money-title{ font-size: 34px; color: #fff; font-weight: normal; padding-bottom: 10px;}
 .money-number{ font-size: 48px; color: #fff; padding-bottom: 4px; font-weight: 700;}
 .money-cny{ font-size: 28px; color: #d9ffea;}
+.del-cny{text-decoration:line-through; opacity: .5;}
 .money-usdt{ text-align: center;}
 .money-ban{ margin-bottom: 10px;}
 .money-ban-title{ font-size: 32px; font-weight: normal; padding: 10px 0; margin-top: 30px;}
@@ -497,3 +510,27 @@ footer ol li.active .icon-text-2{ color: #10c17d; display: block;}
     background: none!important;
     border:2px solid #ccc!important;
 }
+
+.box-out{ position: fixed; display: none; left: 0; top: 0; right: 0; bottom: 0; z-index: 9; background: rgba(0,0,0,.7);}
+.box-out.show{ display: block;}
+.box-out-ul{ position: absolute;bottom: 0; left: 0; right: 0; z-index: 2; background: #fff; border-radius: 24px 24px 0 0; overflow: hidden;}
+.box-out-ul li{ border-bottom: 1px solid #eee; line-height: 108px; text-align: center; font-size: 32px; color: #333;}
+.box-out-ul li:last-child{ border-bottom: 0;}
+.box-out-ul li:nth-last-of-type(2){ border-bottom:20px solid #eee;}
+.box-out-ul li:not(.selected).touch-event-active{ background-color: #ddd;}
+.box-out-ul li.selected{ position: relative;}
+.box-out-ul li.selected:before,
+.box-out-ul li.selected:after{
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: block;
+    width: 40px;
+    height: 3px;
+    background: #297ce0;
+}
+.box-out-ul li.selected:before{-webkit-transform: rotate(-45deg); width: 34px; margin-top: -4px; margin-left: -90px;}
+.box-out-ul li.selected:after{-webkit-transform: rotate(45deg); width: 14px; margin-top: 3px; margin-left: -95px;}
+
+.iphoneX .box-out li:last-child{ padding-bottom: 54px;}
