@@ -449,9 +449,10 @@
                     $$.obj("#pageBtn").setAttribute("data-code",encodeURIComponent(JSON.stringify(data_code)));
                     //一键申诉
                     if(
+                        data_code["payDate"] &&
                         data_code["transactionType"] == "1" &&  //订单进行中
                         data_code["tradingState"] == "2" &&     //订单处于已付款中
-                        (new Date().getTime())-parseInt(data_code["createTime"])>(2*60*60*1000)  //超过2小时的订单
+                        (new Date().getTime())-parseInt(data_code["payDate"])>(2*60*60*1000)  //超过2小时的订单
                     ){
                         $$.obj("#pageBtn0").parentNode.style.display = 'block';
                     }else{
@@ -971,7 +972,7 @@
                                 '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do用户"]+'</em>' +
                                 '</span>' +
                                 '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) +
-                                [_data[i]["transactionType"] == "1" && _data[i]["tradingState"] == "2" && (new Date().getTime())-parseInt(_data[i]["createTime"])>(2*60*60*1000)?'<span class="font-blue">(可申诉)</span>':""] +
+                                [_data[i]["transactionType"] == "1" && _data[i]["tradingState"] == "2" && _data[i]["payDate"] && (new Date().getTime())-parseInt(_data[i]["payDate"])>(2*60*60*1000)?'<span class="font-blue">(可申诉)</span>':""] +
                                 '</span>' +
                                 '</p>' +
                                 '<p class="touch-event order-info">' +
@@ -1680,7 +1681,7 @@
                                 '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do用户"]+'</em>' +
                                 '</span>' +
                                 '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) +
-                                [_data[i]["transactionType"] == "1" && _data[i]["tradingState"] == "2" && (new Date().getTime())-parseInt(_data[i]["createTime"])>(2*60*60*1000)?'<span class="font-blue">(可申诉)</span>':""] +
+                                [_data[i]["transactionType"] == "1" && _data[i]["tradingState"] == "2" && _data[i]["payDate"] && (new Date().getTime())-parseInt(_data[i]["payDate"])>(2*60*60*1000)?'<span class="font-blue">(可申诉)</span>':""] +
                                 '</span>' +
                                 '</p>' +
                                 '<p class="touch-event order-info">' +
