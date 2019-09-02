@@ -359,7 +359,7 @@
                     };
                     var source_data = {
                         "support" : "Exnet.io交易平台",
-                        "huiyoubao.tld" : "ODIN浏览器生态链"
+                        "wuleiedu" : "ODIN浏览器生态链"
                     };
                     var data_code = get_the.parentNode.getAttribute("data-code");
                     data_code = decodeURIComponent(data_code);
@@ -445,10 +445,23 @@
                     //下单时间
                     $$.obj("#orderTime").innerHTML = '';
                     $$.obj("#orderTime").innerHTML = $$.format_time(data_code["createTime"]);
+                    //
+                    $$.obj("#pageBtn").setAttribute("data-code",encodeURIComponent(JSON.stringify(data_code)));
+                    //一键申诉
+                    if(
+                        data_code["transactionType"] == "1" &&  //订单进行中
+                        data_code["tradingState"] == "2" &&     //订单处于已付款中
+                        (new Date().getTime())-parseInt(data_code["createTime"])>(2*60*60*1000)  //超过2小时的订单
+                    ){
+                        $$.obj("#pageBtn0").parentNode.style.display = 'block';
+                    }else{
+                        $$.obj("#pageBtn0").parentNode.style.display = 'none';
+                    }
                 }
             }catch (err){
                 //confirm(err);
             }
+
 
             try {
                 //放币-我已付款
@@ -461,6 +474,8 @@
                     var orderID = data_code2["orderNum"];
                     var createTime = parseInt(data_code2["createTime"]);//new Date().getTime();
                     var paymentID = data_code2["opmId"];
+
+                    if(get_the.className && get_the.className.indexOf("disabled")>0) return;
 
                     confirm("此操作不可逆，确定？",{
                         reset : "取消",
@@ -551,15 +566,66 @@
         };
 
         var pageBtn = $$.obj("#pageBtn");
-        switch(pageBtn){
-            case '立即放币':
-                break;
-            case '我已付款':
-                break;
-            case '查看资产':
-                alert("查看资产");
-                $$.removeClass(pageDetail, "page-in");
-                break;
+        pageBtn.onclick = function() {
+
+            try {
+                //放币-我已付款
+                var data_code2 = this.getAttribute("data-code");
+                data_code2 = decodeURIComponent(data_code2);
+                //confirm(data_code2);
+                data_code2 = JSON.parse(data_code2);
+                var orderID = data_code2["orderNum"];
+                var createTime = parseInt(data_code2["createTime"]);//new Date().getTime();
+                var paymentID = data_code2["opmId"];
+
+                if(this.className && this.className.indexOf("disabled")>0) return;
+
+                if(this.innerText=="查看资产") {
+                    $$.removeClass(pageDetail, "page-in");
+                    document.querySelectorAll("#menu li")[2].onclick();
+                }else {
+                    confirm("此操作不可逆，确定？", {
+                        reset: "取消",
+                        sure: "确定",
+                        callback: function (n) {
+                            if (n === 0) return $$.del($$.obj(".confirm")[0]);
+
+                            if (this.innerText == "立即放币") {
+                                //网络请求
+                                coin_release(createTime, orderID);
+                            } else if (this.innerText == "我已付款") {
+                                //网络请求
+                                money_release(orderID, paymentID);
+                            }
+                        }
+                    });
+                }
+            }catch (err){alert(err);}
+            //switch (pageBtn.innerHTML) {
+            //    case '立即放币':
+            //        break;
+            //    case '我已付款':
+            //        break;
+            //    case '查看资产':
+            //        alert("查看资产");
+            //        $$.removeClass(pageDetail, "page-in");
+            //        break;
+            //}
+        };
+
+        //一键申诉
+        var pageBtn0 = $$.obj("#pageBtn0");
+        pageBtn0.onclick = function(){
+            var data_code2 = $$.obj("#pageBtn").getAttribute("data-code");
+            data_code2 = decodeURIComponent(data_code2);
+            console.log(data_code2);
+            data_code2 = JSON.parse(data_code2);
+            var orderID = data_code2["orderNum"];
+            var is_buy = data_code2["transactionType"] == '0'?1:2;
+            go_appeal(orderID,is_buy,{
+                money:data_code2["totalMoney"],
+                userName:data_code2["accountInfo"]
+            });
         }
 
         var copyBtn1 = $$.obj("#copyBtn1");
@@ -785,7 +851,7 @@
                 };
                 var source_data = {
                     "support" : "Exnet.io交易平台用户",
-                    "huiyoubao.tld" : "ODIN浏览器生态链用户"
+                    "wuleiedu" : "ODIN浏览器生态链用户"
                 };
                 var ulObj = showList[n].getElementsByTagName("ul");
 
@@ -829,12 +895,13 @@
 
                         for (var i = 0; i < len; i++) {
                             var remark = _data[i]["remark"];
-                            var tel,username,simpleUserName="O";
+                            var tel='',username='',simpleUserName="O";
                             try {
                                 remark = JSON.parse(remark);
                                 tel = remark["mobile"];
                                 username = remark["nickName"];
                                 simpleUserName = username.substr(0,1).toUpperCase();
+                                if(!username) username = "匿名用户";
                             }catch (err){
                                 username = "匿名用户";
                             }
@@ -903,7 +970,9 @@
                                 '<em class="user-nick-name">' + [_data[i]["buyerNickName"]=="support"?username:_data[i]["buyerNickName"]] + '</em>' +
                                 '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do用户"]+'</em>' +
                                 '</span>' +
-                                '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) + '</span>' +
+                                '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) +
+                                [_data[i]["transactionType"] == "1" && _data[i]["tradingState"] == "2" && (new Date().getTime())-parseInt(_data[i]["createTime"])>(2*60*60*1000)?'<span class="font-blue">(可申诉)</span>':""] +
+                                '</span>' +
                                 '</p>' +
                                 '<p class="touch-event order-info">' +
                                 '<span class="order-item">' +
@@ -1038,6 +1107,58 @@
             fail : function(){
                 loading("off");
                 confirm("网络超时，提交失败");
+            }
+        });
+    }
+    //一键申诉
+    function go_appeal(orderID,typeInit,orderInfo){
+        var request_data = {
+            key:window.key,
+            orderNum: orderID, //订单号
+            type:typeInit,//1买 2卖
+            cause:1,//1买家未进行转账操作,未收到转账 2其他
+            complaintTxt:encodeURIComponent("[来自承兑商App]"),
+            timestamp: new Date().getTime() //调用Open API时的当前系统时间戳(允许传入时间戳与系统时间相差30s内)
+        };
+        console.log("cause="+request_data.cause+"&complaintTxt="+request_data.complaintTxt+"&key="+window.key+"&orderNum="+request_data.orderNum+"&type="+request_data.type);
+        var get_token = HMAC_SHA256_MAC(window.secret, "cause="+request_data.cause+"&complaintTxt="+request_data.complaintTxt+"&key="+window.key+"&orderNum="+request_data.orderNum+"&type="+request_data.type);
+        confirm('<p class="box-out-p">申诉金额：'+orderInfo.money+' 元</p>'+
+                '<p class="box-out-p">申诉对象：<span>'+orderInfo.userName+'</span></p>'+
+                '<p class="box-out-p">申诉原因：买家未进行转账操作,未收到转账</p>'+
+                '<p class="box-out-p">客服建议：电话联系对方或者耐心等待到账</p>'
+            ,{
+                title:"申诉确认",
+                reset:"取消",
+                sure:"提交",
+                callback:function(n){
+                    if(n==1) {
+                        loading("请稍后");
+                        request_data["content"] = get_token;
+                        //开始一键申诉
+                        $$.ajax({
+                            url: "https://api.coinpay.do/pizza/api/order/otcTradeComplaint",
+                            type: "POST",
+                            data: request_data,
+                            success: function (result) {
+                                loading("off");
+                                //console.log(result);
+                                result = JSON.parse(result);
+                                if (result["err"] == "0") {
+                                    //成功
+                                    confirm("提交成功，等待客服调查！", function () {
+                                        document.querySelector("#pageDetail header .prev").onclick();
+                                    });
+                                } else if (result["err"] == "1") {
+                                    //失败
+                                    confirm("提交(" + orderID + ")失败(原因：" + result["msg"] + ")");
+                                } else console.log(result);
+                            },
+                            fail: function () {
+                                loading("off");
+                                confirm("网络超时，提交失败");
+                            }
+                        });
+                    }
             }
         });
     }
@@ -1438,10 +1559,13 @@
                             } catch (err) {
                             }
                         }
-                    }else{
+                    }else if(old_len == len){
                         //没有新订单
                         $$.obj("#msgNew").style.display = "none";
                         $$.removeClass(document.querySelector("#view .ban .tab li"),"tab-new-msg");
+                    }else{
+                        //有订单取消
+                        location.href = location.href;
                     }
 
                     if(len>0){
@@ -1474,18 +1598,21 @@
                         };
                         var source_data = {
                             "support" : "Exnet.io交易平台用户",
-                            "huiyoubao.tld" : "ODIN浏览器生态链用户"
+                            "wuleiedu" : "ODIN浏览器生态链用户"
                         };
                         $$.order_by(_data, "createTime", true);
                         for (var i = 0; i < len; i++) {
                             var remark = _data[i]["remark"];
-                            var tel,username,simpleUserName="O";
+                            var tel='',username='',simpleUserName="O";
                             try {
                                 remark = JSON.parse(remark);
                                 tel = remark["mobile"];
                                 username = remark["nickName"];
                                 simpleUserName = username.substr(0,1).toUpperCase();
-                            }catch (err){}
+                                if(!username) username = "匿名用户";
+                            }catch (err){
+                                username = "匿名用户";
+                            }
 
                             var pay_html = '';
                             try {
@@ -1552,7 +1679,9 @@
                                 '<em class="user-nick-name">' + [_data[i]["buyerNickName"]=="support"?username:_data[i]["buyerNickName"]] + '</em>' +
                                 '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do用户"]+'</em>' +
                                 '</span>' +
-                                '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) + '</span>' +
+                                '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) +
+                                [_data[i]["transactionType"] == "1" && _data[i]["tradingState"] == "2" && (new Date().getTime())-parseInt(_data[i]["createTime"])>(2*60*60*1000)?'<span class="font-blue">(可申诉)</span>':""] +
+                                '</span>' +
                                 '</p>' +
                                 '<p class="touch-event order-info">' +
                                 '<span class="order-item">' +

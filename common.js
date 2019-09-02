@@ -62,6 +62,7 @@
 
     window.confirm = function(str,options,single_callback){
         options = {
+            title : options && options.title  || "系统确认",
             reset : options && options.callback && typeof(eval(options.callback))=="function" ? [options && options.reset || "取消"]:[options && options.reset || "知道了"],
             sure  : options && options.sure  || "确定",
             callback : options && options.callback || null
@@ -85,7 +86,7 @@
         confirm.innerHTML = '<div class="confirm-tr">'+
             '<div class="confirm-td">'+
             '<div class="confirm-box">'+
-            '<div class="confirm-title">系统提示</div>'+
+            '<div class="confirm-title">'+options.title+'</div>'+
             '<div class="confirm-content">'+str+'</div>'+
             '<div class="confirm-handle">'+handle_str+
             '</div>'+

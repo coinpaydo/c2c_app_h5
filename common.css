@@ -118,6 +118,8 @@ header .tab>li.tab-active{ background: #297ce0; color: #fff;}
 .btn{ background-color: #10c17d; color: #fff; border-radius: 16px; height: 98px; width: 100%; display: block; text-align: center; font-size: 36px; letter-spacing: 2px; font-weight: 500; border: 0; -webkit-appearance: none; margin: 40px auto 0 auto;}
 .btn.touch-event-active{background-color: #0fb374 !important;}
 .btn[disabled]{ border-color: #ccc!important; color: #ccc!important;}
+.btn.red{background-color: #9c3b1c;}
+.btn.red.touch-event-active{background-color: #833217!important;}
 .cmd{ margin: 10px auto;word-wrap:break-word; line-height: 1.5em; font-size: 24px;}
 .cmd time{ color: #10c17d;}
 .content.disabled .input,
@@ -215,6 +217,7 @@ footer ol li.active .icon-text-2{ color: #10c17d; display: block;}
 .user-photo>img{ width: 100%;border-radius: 50%;}
 .user-nick-name{  margin-right: 4px;font-size: 28px; color: #297ce0; display: inline-block; vertical-align: middle;}
 .order-time{ font-size: 28px; color: #333; position: absolute; right: 0px; top: 50%; line-height: 44px; margin-top: -22px;}
+.font-blue{ position: absolute; right: 0px; top:30px; font-size: 24px;}
 .order-info{ padding: 20px 20px 30px 20px; position: relative;}
 .order-info:before,
 .order-info:after{
@@ -326,11 +329,13 @@ footer ol li.active .icon-text-2{ color: #10c17d; display: block;}
     top: 0;
     bottom: 0;
     width: 100%;
+    overflow-y: auto;
     z-index: 999;
     background: #f1f1f1;
     -webkit-transform: translate3d(100%,0,0);
     transform: translate3d(100%,0,0);
     -webkit-transition: all .4s cubic-bezier(.15,.39,.08,.82);
+    -webkit-overflow-scrolling: touch;
     /*-webkit-transition: all .6s cubic-bezier(1,.15,1,.07);*/
 }
 .page-detail.page-in{
@@ -454,7 +459,7 @@ footer ol li.active .icon-text-2{ color: #10c17d; display: block;}
     margin-top: -14px;
     opacity: .5;
 }
-.order-other-handle{ padding: 40px 40px;}
+.order-other-handle{ margin: 40px 40px;}
 
 .show-list{display: none; padding-top: 20px; position: relative; height: 100%; overflow: auto;-webkit-overflow-scrolling: touch;}
 .show-list.show-active{ display: block;}
@@ -534,3 +539,12 @@ footer ol li.active .icon-text-2{ color: #10c17d; display: block;}
 .box-out-ul li.selected:after{-webkit-transform: rotate(45deg); width: 14px; margin-top: 3px; margin-left: -95px;}
 
 .iphoneX .box-out li:last-child{ padding-bottom: 54px;}
+.box-out-p{
+    padding-top: 10px;
+    line-height: 2em;
+    font-size: 24px;
+    text-align: left;
+}
+.font-blue{
+    color: #833217;
+}
