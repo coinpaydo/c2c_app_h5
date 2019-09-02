@@ -62,7 +62,7 @@
 
     window.confirm = function(str,options,single_callback){
         options = {
-            title : options && options.title  || "系统确认",
+            title : options && options.title  || "系统提示",
             reset : options && options.callback && typeof(eval(options.callback))=="function" ? [options && options.reset || "取消"]:[options && options.reset || "知道了"],
             sure  : options && options.sure  || "确定",
             callback : options && options.callback || null

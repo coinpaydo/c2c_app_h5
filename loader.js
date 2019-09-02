@@ -11,7 +11,7 @@
             window.appConfig = {
                 api_domain: "http://47.91.153.112",
                 ips_list: ["11.46.5.179", "12.47.6.162","13.48.7.123"],
-                version: "1.0.0"
+                version: "1.0.3"
             };
 
             $$.setupWebViewJavascriptBridge(function(bridge) {
@@ -775,6 +775,23 @@
             }
             menu_li[default_n].onclick();
         }catch (err){}
+
+        var rightBtn = $$.obj("#rightBtn");
+        rightBtn.onclick = function(){
+            confirm("确定退出？",{
+                callback : function(n){
+                    if(n==1){
+                        //删除key,secret
+                        $$.bridge.callHandler('native_handle','localStorage_del_apiKey');
+                        $$.bridge.callHandler('native_handle','localStorage_del_apiSecret');
+
+                        handle_login(false);
+
+                        alert("退出成功!");
+                    }
+                }
+            });
+        }
     }
 
     //开始查询订单
