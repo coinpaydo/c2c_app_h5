@@ -778,16 +778,23 @@
 
         var rightBtn = $$.obj("#rightBtn");
         rightBtn.onclick = function(){
-            confirm("确定退出？",{
+            confirm("<p style='text-align: left; line-height: 1.5em;padding-bottom: 10px;'><b>【切换账号】</b>退出当前账号登录，回到扫码登录页面</p>"+
+                    "<p style='text-align: left; line-height: 1.5em;padding-bottom: 10px;'><b>【暂停接单】</b>下架全部广告即可暂停接单（如果有未完成的订单请先处理完成才能暂停接单）</p>"+
+                    "<p style='text-align: center; line-height: 1.5em;padding-bottom: 10px; opacity: .6;'>摇一摇取消本操作</p>",{
+                sure: "去下架广告",
+                reset:"切换账号",
                 callback : function(n){
-                    if(n==1){
+                    if(n==0){
                         //删除key,secret
                         $$.bridge.callHandler('native_handle','localStorage_del_apiKey');
                         $$.bridge.callHandler('native_handle','localStorage_del_apiSecret');
 
                         handle_login(false);
 
-                        alert("退出成功!");
+                        alert("已退出当前账号登录");
+                    }
+                    if(n==1){
+                        document.querySelectorAll("#menu li")[1].onclick();
                     }
                 }
             });
@@ -985,7 +992,7 @@
                                 '<p class="order-header">' +
                                 '<span class="user-info">' +
                                 '<em class="user-photo">'+simpleUserName+'</em>' +
-                                '<em class="user-nick-name">' + [_data[i]["buyerNickName"]=="support"?username:_data[i]["buyerNickName"]] + '</em>' +
+                                '<em class="user-nick-name">' + [source_data[_data[i]["buyerNickName"]]?username:_data[i]["buyerNickName"]] + '</em>' +
                                 '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do用户"]+'</em>' +
                                 '</span>' +
                                 '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) +
@@ -1520,7 +1527,6 @@
 
     //定时任务
     function autoTimeRun(){
-
         //查询进行中的订单
         var timer = new Date().getTime();
         $$.ajax({
@@ -1694,7 +1700,7 @@
                                 '<p class="order-header">' +
                                 '<span class="user-info">' +
                                 '<em class="user-photo">'+simpleUserName+'</em>' +
-                                '<em class="user-nick-name">' + [_data[i]["buyerNickName"]=="support"?username:_data[i]["buyerNickName"]] + '</em>' +
+                                '<em class="user-nick-name">' + [source_data[_data[i]["buyerNickName"]]?username:_data[i]["buyerNickName"]] + '</em>' +
                                 '<em class="user-from">'+[source_data[_data[i]["buyerNickName"]]?"来自"+source_data[_data[i]["buyerNickName"]]:"来自CoinPay.do用户"]+'</em>' +
                                 '</span>' +
                                 '<span class="order-time">' + $$.format_time(_data[i]["createTime"]) +
